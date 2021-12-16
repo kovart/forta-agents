@@ -7,7 +7,6 @@ import {
 } from 'forta-agent';
 import { LogUtils, TimelockUtils } from './utils';
 import {
-  PROTOCOL,
   ARCHIVE_DATA_MODE,
   ROLE_GRANTED_ALERT_ID,
   ROLE_REVOKED_ALERT_ID,
@@ -44,20 +43,22 @@ function provideHandleTransaction(timelockUtils: TimelockUtils, logUtils: LogUti
         const { role, account, sender } = roleGrantedLog.args;
         // get granted role name by its keccak256 hash
         const grantedRole = timelockUtils.getRoleNameByHash(role);
+
+        // do nothing if it's an unknown role
+        if(!grantedRole) continue;
+
         // get current account roles including granted one (contract call)
         const accountRoles = await timelockUtils.getRoleNames(contractAddress, account, blockTag);
-        // get current account roles except granted one
-        const previousRoles = accountRoles.filter((role) => role !== grantedRole);
 
         const isSuspicious =
-          previousRoles.includes(TimelockControllerRoles.EXECUTOR) &&
+          accountRoles.includes(TimelockControllerRoles.EXECUTOR) &&
           (grantedRole === TimelockControllerRoles.PROPOSER ||
             grantedRole === TimelockControllerRoles.TIMELOCK_ADMIN);
 
         findings.push(
           createRoleGrantedFinding(
             contractAddress,
-            previousRoles,
+            accountRoles,
             grantedRole,
             account,
             sender,
@@ -72,6 +73,10 @@ function provideHandleTransaction(timelockUtils: TimelockUtils, logUtils: LogUti
         const { role, account, sender } = roleRevokedLog.args;
         // get revoked role name by its keccak256 hash
         const revokedRole = timelockUtils.getRoleNameByHash(role);
+
+        // do nothing if it's an unknown role
+        if(!revokedRole) continue;
+
         // get current account roles without revoked one
         const accountRoles = await timelockUtils.getRoleNames(contractAddress, account, blockTag);
 
@@ -96,12 +101,9 @@ function provideHandleTransaction(timelockUtils: TimelockUtils, logUtils: LogUti
   };
 }
 
-const joinRoleNames = (roles: string[]) =>
-  roles.length > 0 ? `${roles.join(' and ')} ${roles.length > 1 ? 'roles' : 'role'}` : '';
-
 function createRoleGrantedFinding(
   contract: string,
-  previousRoles: string[],
+  accountRoles: string[],
   grantedRole: string,
   account: string,
   sender: string,
@@ -110,12 +112,8 @@ function createRoleGrantedFinding(
 ) {
   return Finding.fromObject({
     name: `${grantedRole} Role Granted`,
-    description:
-      `Account ${account} ` +
-      `${previousRoles.length > 0 ? `with ${joinRoleNames(previousRoles)} ` : ''}` +
-      `has been granted a new ${grantedRole} role for contract ${contract}`,
+    description: `Account ${account} has been granted a new ${grantedRole} role for contract ${contract}`,
     alertId: ROLE_GRANTED_ALERT_ID,
-    protocol: PROTOCOL,
     severity: severity,
     type: type,
     metadata: {
@@ -123,70 +121,62 @@ function createRoleGrantedFinding(
       account: account,
       contract: contract,
       grantedRole: grantedRole,
-      previousRoles: JSON.stringify(previousRoles)
+      accountRoles: JSON.stringify(accountRoles)
     }
   });
 }
 
 function createNoSelfAdministrationFinding(
   contract: string,
-  currentRoles: string[],
+  accountRoles: string[],
   sender: string
 ) {
   return Finding.fromObject({
     name: `Contract Lost Its Self-Administration`,
     description: `Contract address ${contract} has been revoked from ${TimelockControllerRoles.TIMELOCK_ADMIN} role`,
     alertId: NO_SELF_ADMINISTRATION_ALERT_ID,
-    protocol: PROTOCOL,
     severity: FindingSeverity.High,
     type: FindingType.Suspicious,
     metadata: {
       sender: sender,
       contract: contract,
-      contractRoles: JSON.stringify(currentRoles)
+      accountRoles: JSON.stringify(accountRoles)
     }
   });
 }
 
 function createRoleRenouncedFinding(
   contract: string,
-  currentRoles: string[],
+  accountRoles: string[],
   revokedRole: string,
   account: string
 ) {
   return Finding.fromObject({
     name: `${revokedRole} Role Renounced`,
-    description:
-      `Account ${account} ` +
-      `${currentRoles.length > 0 ? `with ${joinRoleNames(currentRoles)} ` : ''}` +
-      `has renounced ${revokedRole} role for contract ${contract}`,
+    description: `Account ${account} has renounced ${revokedRole} role for contract ${contract}`,
     alertId: ROLE_RENOUNCED_ALERT_ID,
-    protocol: PROTOCOL,
     severity: FindingSeverity.Medium,
     type: FindingType.Info,
     metadata: {
       account: account,
       contract: contract,
-      revokedRole: revokedRole
+      revokedRole: revokedRole,
+      accountRoles: JSON.stringify(accountRoles)
     }
   });
 }
 
 function createRoleRevokedFinding(
   contract: string,
-  currentRoles: string[],
+  accountRoles: string[],
   revokedRole: string,
   account: string,
   sender: string
 ) {
   return Finding.fromObject({
     name: `${revokedRole} Role Revoked`,
-    description:
-      `Account ${account} ` +
-      `${currentRoles.length > 0 ? `with ${joinRoleNames(currentRoles)} ` : ''}` +
-      `has been revoked ${revokedRole} role for contract ${contract}`,
+    description: `Account ${account} has been revoked ${revokedRole} role for contract ${contract}`,
     alertId: ROLE_REVOKED_ALERT_ID,
-    protocol: PROTOCOL,
     severity: FindingSeverity.Medium,
     type: FindingType.Info,
     metadata: {
@@ -194,7 +184,7 @@ function createRoleRevokedFinding(
       account: account,
       contract: contract,
       revokedRole: revokedRole,
-      currentRoles: JSON.stringify(currentRoles)
+      accountRoles: JSON.stringify(accountRoles)
     }
   });
 }

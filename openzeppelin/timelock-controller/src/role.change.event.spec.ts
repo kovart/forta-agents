@@ -1,6 +1,7 @@
 import { FindingSeverity, FindingType, HandleTransaction } from 'forta-agent';
 import { createAddress, TestTransactionEvent } from 'forta-agent-tools';
 import { TestUtils } from './utils';
+import { utils } from 'ethers';
 import { TimelockControllerRoles } from './constants';
 import Agent from './role.change.event';
 
@@ -45,6 +46,43 @@ describe('role change event agent', () => {
     expect(findings).toStrictEqual([]);
   });
 
+  it('returns empty findings if unknown role has been changed', async () => {
+    const contract = createAddress('0x111');
+    const account = createAddress('0x222');
+    const sender = createAddress('0x333');
+    const role = utils.id('UNKNOWN_ROLE');
+
+    let log, findings;
+
+    // Role Granted
+    // --------------------------------------
+
+    log = testUtils.createRoleGrantedLog(contract)(role, account, sender);
+
+    mockLogUtils.parse.mockReturnValue([log.parsedLog]);
+    mockTimelockUtils.getRoleNameByHash.mockReturnValue(undefined); // not found
+
+    findings = await handleTransaction(txEvent);
+
+    expect(findings).toStrictEqual([]);
+    expect(mockTimelockUtils.getRoleNames).toHaveBeenCalledTimes(0);
+    expect(mockTimelockUtils.getRoleNameByHash).toHaveBeenCalledTimes(1);
+
+    // Role Revoked
+    // --------------------------------------
+
+    log = testUtils.createRoleRevokedLog(contract)(role, account, sender);
+
+    mockLogUtils.parse.mockReturnValue([log.parsedLog]);
+    mockTimelockUtils.getRoleNameByHash.mockReturnValue(undefined); // not found
+
+    findings = await handleTransaction(txEvent);
+
+    expect(findings).toStrictEqual([]);
+    expect(mockTimelockUtils.getRoleNames).toHaveBeenCalledTimes(0);
+    expect(mockTimelockUtils.getRoleNameByHash).toHaveBeenCalledTimes(2);
+  });
+
   it('returns RoleGranted finding with "Info" type', async () => {
     const contract = createAddress('0x111');
     const account = createAddress('0x222');
@@ -83,7 +121,7 @@ describe('role change event agent', () => {
     let finding, findings;
 
     // EXECUTOR became PROPOSER
-    //--------------------------------------
+    // --------------------------------------
 
     const proposerLogGranted = testUtils.createRoleGrantedLog(contract)(
       TimelockControllerRoles.PROPOSER,
@@ -113,7 +151,7 @@ describe('role change event agent', () => {
     expect(findings).toStrictEqual([finding]);
 
     // EXECUTOR became TIMELOCK_ADMIN
-    //--------------------------------------
+    // --------------------------------------
 
     const adminRoleGrantedLog = testUtils.createRoleGrantedLog(contract)(
       TimelockControllerRoles.EXECUTOR,

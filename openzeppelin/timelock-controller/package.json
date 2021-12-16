@@ -1,6 +1,6 @@
 {
   "name": "forta-openzeppelin-timelock-controller-agent",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Forta Agent that detects exploits of the OpenZeppelin TimelockController contract and helps to monitor any role changes in it",
   "repository": "https://github.com/kovart/forta-agents/tree/main/openzeppelin/timelock-controller/",
   "scripts": {

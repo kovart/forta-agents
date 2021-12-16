@@ -2,7 +2,6 @@ import uniq from 'lodash/uniq';
 import { TransactionEvent, Finding, FindingSeverity, FindingType } from 'forta-agent';
 import { LogUtils } from './utils';
 import {
-  PROTOCOL,
   ZERO_DELAY_ALERT_ID,
   EXPLOIT_ALERT_ID,
   TimelockControllerAbi,
@@ -80,7 +79,6 @@ function createZeroDelayFinding(fromAddress: string, contractAddress: string) {
     name: 'TimelockController Minimum Delay Changed To Zero',
     description: `TimelockController can now instantly execute dangerous maintenance operations`,
     alertId: ZERO_DELAY_ALERT_ID,
-    protocol: PROTOCOL,
     severity: FindingSeverity.Critical,
     type: FindingType.Exploit,
     metadata: {
@@ -104,7 +102,6 @@ function createLifecycleViolationFinding(
       `Contract address: ${contractAddress}. Sender: ${fromAddress}.\n` +
       `Read more: https://forum.openzeppelin.com/t/timelockcontroller-vulnerability-post-mortem/14958`,
     alertId: EXPLOIT_ALERT_ID,
-    protocol: PROTOCOL,
     severity: FindingSeverity.Critical,
     type: FindingType.Exploit,
     metadata: {

@@ -2,12 +2,30 @@
 
 ## Description
 
-This agent detects exploits of the OpenZeppelin `TimelockController` contract and helps to monitor any role changes in it.
+This agent detects exploits of the OpenZeppelin `TimelockController` contract and helps to monitor role changes in it.
 
 ---
 
 For a detailed description of the contract vulnerability refer to the [post-mortem.](https://forum.openzeppelin.com/t/timelockcontroller-vulnerability-post-mortem/14958)
 
+## Supported roles
+
+This agent fires alert if one of the following roles is detected in `RoleGranted` and `RoleRevoked` events:
+
+- TIMELOCK_ADMIN_ROLE
+- PROPOSER_ROLE
+- EXECUTOR_ROLE
+- DEFAULT_ADMIN_ROLE
+- ADMIN_ROLE
+- MINTER_ROLE
+- BURNER_ROLE
+- SWAPPER_ROLE
+- SETTER_ROLE
+- PAUSER_ROLE
+- UNPAUSER_ROLE
+- RELAY_ROLE
+- ACTION_ROLE
+- SNAPSHOT_ROLE
 
 ## Variables
 
@@ -40,7 +58,7 @@ Variables can be configured in the `constants.ts` file.
   - Type is always set to `"exploit"`
   - Metadata
     - `from` address of the sender
-    - `contract` affected contract
+    - `contract` affected contract address
     - `operationId` id of the executed operation
     - `callData` stringified operation params ({ target, value, data }) 
     - `delay` delay of the executed operation
@@ -57,8 +75,8 @@ Variables can be configured in the `constants.ts` file.
     - `sender` the account that originated the contract call
     - `account` granted account address
     - `contract` contract address
-    - `grantedRole` granted role name (not a hash)
-    - `previousRoles` roles of the account without the granted one
+    - `grantedRole` granted role name
+    - `accountRoles` all known roles of the account
 
 - OPENZEPPELIN-TIMELOCK-CONTROLLER-3
   - Fired when role has been revoked
@@ -68,8 +86,8 @@ Variables can be configured in the `constants.ts` file.
     - `sender` the account that originated the contract call
     - `account` revoked account address
     - `contract` contract address
-    - `revokedRole` revoked role name (not a hash)
-    - `currentRoles` all roles of the account without the revoked one
+    - `revokedRole` revoked role name
+    - `accountRoles` all known roles of the account without the revoked one
 
 - OPENZEPPELIN-TIMELOCK-CONTROLLER-4
   - Fired when role has been renounced
@@ -78,7 +96,7 @@ Variables can be configured in the `constants.ts` file.
   - Metadata
     - `account` renounced account address
     - `contract` contract address
-    - `revokedRole` name of renounced role
+    - `revokedRole` name of the renounced role
 
 - OPENZEPPELIN-TIMELOCK-CONTROLLER-5
   - Fired if contract address has been revoked from `TIMELOCK_ADMIN` role
@@ -87,7 +105,7 @@ Variables can be configured in the `constants.ts` file.
   - Metadata
     - `sender` the account that originated the contract call
     - `contract` contract address
-    - `contractRoles` all roles of the contract address
+    - `accountRoles` all known roles of the contract address
 
 ## Test data
 

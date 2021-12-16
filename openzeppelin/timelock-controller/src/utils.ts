@@ -40,9 +40,21 @@ export class LogUtils {
 
 export class TimelockUtils {
   static RolesHashMap = {
+    '0x0000000000000000000000000000000000000000000000000000000000000000':
+      TimelockControllerRoles.DEFAULT_ADMIN,
     [utils.id('TIMELOCK_ADMIN_ROLE')]: TimelockControllerRoles.TIMELOCK_ADMIN,
     [utils.id('PROPOSER_ROLE')]: TimelockControllerRoles.PROPOSER,
-    [utils.id('EXECUTOR_ROLE')]: TimelockControllerRoles.EXECUTOR
+    [utils.id('EXECUTOR_ROLE')]: TimelockControllerRoles.EXECUTOR,
+    [utils.id('MINTER_ROLE')]: TimelockControllerRoles.MINTER,
+    [utils.id('BURNER_ROLE')]: TimelockControllerRoles.BURNER,
+    [utils.id('SWAPPER_ROLE')]: TimelockControllerRoles.SWAPPER,
+    [utils.id('SETTER_ROLE')]: TimelockControllerRoles.SETTER,
+    [utils.id('ADMIN_ROLE')]: TimelockControllerRoles.ADMIN,
+    [utils.id('PAUSER_ROLE')]: TimelockControllerRoles.PAUSER,
+    [utils.id('UNPAUSER_ROLE')]: TimelockControllerRoles.UNPAUSER,
+    [utils.id('RELAY_ROLE')]: TimelockControllerRoles.RELAY,
+    [utils.id('ACTION_ROLE')]: TimelockControllerRoles.ACTION,
+    [utils.id('SNAPSHOT_ROLE')]: TimelockControllerRoles.SNAPSHOT
   };
 
   constructor(
@@ -50,8 +62,8 @@ export class TimelockUtils {
     private archiveDataMode: boolean = false // should be enabled if provider supports this
   ) {}
 
-  public getRoleNameByHash(roleHash: string): string {
-    return TimelockUtils.RolesHashMap[roleHash] || roleHash;
+  public getRoleNameByHash(roleHash: string): string | undefined {
+    return TimelockUtils.RolesHashMap[roleHash];
   }
 
   public async getRoleNames(
@@ -128,9 +140,11 @@ export class TestUtils {
     account: string,
     sender: string
   ) {
-    const roleHash = Object.entries(TimelockUtils.RolesHashMap).find(
+    const existingRole = Object.entries(TimelockUtils.RolesHashMap).find(
       (entry) => roleName === entry[1]
-    )![0];
+    );
+    const roleHash = existingRole ? existingRole[0] : utils.id(roleName);
+
     return this.createLog(abi, 0, address, roleHash, account, sender);
   }
 

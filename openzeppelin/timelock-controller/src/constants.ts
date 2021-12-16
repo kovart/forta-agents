@@ -1,19 +1,31 @@
 import { abi as TimelockControllerAbi } from '@openzeppelin/contracts/build/contracts/TimelockController.json';
 import { utils } from 'ethers';
 
-export const PROTOCOL = 'openzeppelin';
 export const ZERO_DELAY_ALERT_ID = 'OPENZEPPELIN-TIMELOCK-CONTROLLER-0';
 export const EXPLOIT_ALERT_ID = 'OPENZEPPELIN-TIMELOCK-CONTROLLER-1';
 export const ROLE_GRANTED_ALERT_ID = 'OPENZEPPELIN-TIMELOCK-CONTROLLER-2';
 export const ROLE_REVOKED_ALERT_ID = 'OPENZEPPELIN-TIMELOCK-CONTROLLER-3';
 export const ROLE_RENOUNCED_ALERT_ID = 'OPENZEPPELIN-TIMELOCK-CONTROLLER-4';
 export const NO_SELF_ADMINISTRATION_ALERT_ID = 'OPENZEPPELIN-TIMELOCK-CONTROLLER-5';
-export const ARCHIVE_DATA_MODE = true; // https://infura.io/docs/ethereum/add-ons/archiveData
+export const ARCHIVE_DATA_MODE = false; // https://infura.io/docs/ethereum/add-ons/archiveData
 
 export const TimelockControllerRoles = {
+  // BASIC
   TIMELOCK_ADMIN: 'TIMELOCK_ADMIN',
   PROPOSER: 'PROPOSER',
-  EXECUTOR: 'EXECUTOR'
+  EXECUTOR: 'EXECUTOR',
+  DEFAULT_ADMIN: 'DEFAULT_ADMIN',
+  // COMMONLY USED
+  ADMIN: 'ADMIN',
+  MINTER: 'MINTER',
+  BURNER: 'BURNER',
+  SWAPPER: 'SWAPPER',
+  SETTER: 'SETTER',
+  PAUSER: 'PAUSER',
+  UNPAUSER: 'UNPAUSER',
+  RELAY: 'RELAY',
+  ACTION: 'ACTION',
+  SNAPSHOT: 'SNAPSHOT'
 };
 
 export const TimelockControllerEvents = {
