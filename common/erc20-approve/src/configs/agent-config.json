@@ -1,0 +1,6 @@
+{
+  "callsThreshold": 9,
+  "secondsKeepFindings": 604800,
+  "secondsKeepApprovals": 21600,
+  "secondsRegistryCache": 2678400
+}
