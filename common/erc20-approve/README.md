@@ -12,23 +12,23 @@ Example phishing attack: [BadgerDAO](https://rekt.news/badger-rekt/)
 
 File with configurable variables [is placed here](./src/configs/agent-config.json).
 
-##### callsThreshold: `boolean`
+##### callsThreshold: `number`
 
 - Number of approvals after which the agent starts firing alerts.
 - Default `9` calls (alert if > 9)
 
-##### secondsKeepApprovals: `boolean`
+##### secondsKeepApprovals: `number`
 
 - Observation period of token transfer approvals
 - The agent fires alert if it detects more than `callsThreshold` approvals to the same EOA over this period.
 - Default `21600` seconds (6 hours)
 
-##### secondsKeepFindings: `boolean`
+##### secondsKeepFindings: `number`
 
 - Extended observation period of token transfer approvals for detected phishing EOAs. 
 - Default `604800` seconds (7 days)
 
-##### secondsRegistryCache: `boolean`
+##### secondsRegistryCache: `number`
 
 - The period of address inactivity, after which we remove the address from the cache.
 - Default `2678400` seconds (31 days)
