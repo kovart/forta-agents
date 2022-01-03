@@ -13,6 +13,7 @@ export class ERC20Token {
   private _provider: providers.JsonRpcProvider;
   private _contract: Contract | null = null;
   private _symbol: string | null = null;
+  private _decimals: number | null = null;
 
   public address: string;
   public approvals: ApprovalEvent[];
@@ -64,10 +65,28 @@ export class ERC20Token {
 
     try {
       const contract = this.getContract();
-      return await contract.symbol();
+      const symbol = await contract.symbol();
+      this._symbol = symbol;
+      return symbol;
     } catch {
       // Not an ERC20 token ¯\_(ツ)_/¯
-      return 'UNKNOWN';
+      this._symbol = 'UNKNOWN';
+      return this._symbol;
+    }
+  }
+
+  public async decimals(): Promise<number> {
+    if (this._decimals) return this._decimals;
+
+    try {
+      const contract = this.getContract();
+      const decimals = await contract.decimals();
+      this._decimals = decimals;
+      return decimals;
+    } catch {
+      // Not an ERC20 token ¯\_(ツ)_/¯
+      this._decimals = 1;
+      return this._decimals;
     }
   }
 

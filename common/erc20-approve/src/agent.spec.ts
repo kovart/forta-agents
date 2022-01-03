@@ -316,8 +316,9 @@ describe('erc20 approval phishing agent', () => {
       const spender = createAddress('0x1');
       const owner1 = createAddress('0x2');
       const owner2 = createAddress('0x3');
-      const token = createAddress('0x4');
+      const tokenAddress = createAddress('0x4');
       const tokenSymbol = 'TKN';
+      const tokenDecimals = 18;
       const amount = new BigNumber(100);
       const approvals = 4;
 
@@ -327,9 +328,15 @@ describe('erc20 approval phishing agent', () => {
         {
           address: spender,
           owners: [owner1, owner2],
-          amounts: { [token]: amount },
-          tokens: [{ address: token, symbol: jest.fn().mockResolvedValue(tokenSymbol) }],
-          approvalsCount: approvals
+          amounts: { [tokenAddress]: amount },
+          approvalsCount: approvals,
+          tokens: [
+            {
+              address: tokenAddress,
+              symbol: jest.fn().mockResolvedValue(tokenSymbol),
+              decimals: jest.fn().mockResolvedValue(tokenDecimals)
+            }
+          ]
         }
       ]);
 
@@ -341,8 +348,8 @@ describe('erc20 approval phishing agent', () => {
         [owner1, owner2],
         [
           {
-            address: token,
-            amount: amount,
+            address: tokenAddress,
+            amount: amount.div(tokenDecimals),
             symbol: tokenSymbol
           }
         ]
@@ -360,8 +367,9 @@ describe('erc20 approval phishing agent', () => {
       const spender = createAddress('0x1');
       const owner1 = createAddress('0x2');
       const owner2 = createAddress('0x3');
-      const token = createAddress('0x4');
+      const tokenAddress = createAddress('0x4');
       const tokenSymbol = 'TKN';
+      const tokenDecimals = 18;
       const amount = new BigNumber(100);
       const approvals = 4;
 
@@ -371,9 +379,15 @@ describe('erc20 approval phishing agent', () => {
         {
           address: spender,
           owners: [owner1, owner2],
-          amounts: { [token]: amount },
-          tokens: [{ address: token, symbol: jest.fn().mockResolvedValue(tokenSymbol) }],
-          approvalsCount: approvals
+          amounts: { [tokenAddress]: amount },
+          approvalsCount: approvals,
+          tokens: [
+            {
+              address: tokenAddress,
+              symbol: jest.fn().mockResolvedValue(tokenSymbol),
+              decimals: jest.fn().mockResolvedValue(tokenDecimals)
+            }
+          ]
         }
       ]);
 
@@ -390,8 +404,9 @@ describe('erc20 approval phishing agent', () => {
       const spender = createAddress('0x1');
       const owner1 = createAddress('0x2');
       const owner2 = createAddress('0x3');
-      const token = createAddress('0x4');
+      const tokenAddress = createAddress('0x4');
       const tokenSymbol = 'TKN';
+      const tokenDecimals = 18;
       const amount = new BigNumber(100);
       const approvals = 4;
 
@@ -404,8 +419,14 @@ describe('erc20 approval phishing agent', () => {
         {
           address: spender,
           owners: [owner1, owner2],
-          amounts: { [token]: amount },
-          tokens: [{ address: token, symbol: jest.fn().mockResolvedValue(tokenSymbol) }],
+          amounts: { [tokenAddress]: amount },
+          tokens: [
+            {
+              address: tokenAddress,
+              symbol: jest.fn().mockResolvedValue(tokenSymbol),
+              decimals: jest.fn().mockResolvedValue(tokenDecimals)
+            }
+          ],
           approvalsCount: approvals
         }
       ]);
@@ -424,10 +445,17 @@ describe('erc20 approval phishing agent', () => {
       const spender2 = createAddress('0x2');
       const owner1 = createAddress('0x3');
       const owner2 = createAddress('0x4');
-      const token = createAddress('0x5');
+      const tokenAddress = createAddress('0x5');
       const tokenSymbol = 'TKN';
+      const tokenDecimals = 18;
       const amount = new BigNumber(100);
       const approvals = 4;
+
+      const tokenInstance = {
+        address: tokenAddress,
+        symbol: jest.fn().mockResolvedValue(tokenSymbol),
+        decimals: jest.fn().mockResolvedValue(tokenDecimals)
+      };
 
       mockDependenciesConfig.callsThreshold = approvals - 1;
       mockDependenciesConfig.registry.isExchange.mockResolvedValue(false);
@@ -435,15 +463,15 @@ describe('erc20 approval phishing agent', () => {
         {
           address: spender1,
           owners: [owner1, owner2],
-          amounts: { [token]: amount },
-          tokens: [{ address: token, symbol: jest.fn().mockResolvedValue(tokenSymbol) }],
+          amounts: { [tokenAddress]: amount },
+          tokens: [tokenInstance],
           approvalsCount: approvals
         },
         {
           address: spender2,
           owners: [owner1],
-          amounts: { [token]: amount },
-          tokens: [{ address: token, symbol: jest.fn().mockResolvedValue(tokenSymbol) }],
+          amounts: { [tokenAddress]: amount },
+          tokens: [tokenInstance],
           approvalsCount: approvals
         }
       ]);
@@ -458,8 +486,8 @@ describe('erc20 approval phishing agent', () => {
         [owner1, owner2],
         [
           {
-            address: token,
-            amount: amount,
+            address: tokenAddress,
+            amount: amount.div(tokenDecimals),
             symbol: tokenSymbol
           }
         ]
@@ -471,8 +499,8 @@ describe('erc20 approval phishing agent', () => {
         [owner1],
         [
           {
-            address: token,
-            amount: amount,
+            address: tokenAddress,
+            amount: amount.div(tokenDecimals),
             symbol: tokenSymbol
           }
         ]

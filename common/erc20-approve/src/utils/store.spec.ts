@@ -181,8 +181,6 @@ describe('AllowanceStore', () => {
     mockTokenInstance1.balanceOf.mockImplementation((owner: string) => token1Balances[owner]);
     mockTokenInstance2.balanceOf.mockImplementation((owner: string) => token2Balances[owner]);
 
-    const tokensApprovals: { [token: string]: Array<any> } = {};
-
     let counter = 0;
     for (const spender of [spender1, spender2, spender3]) {
       for (const signature of [ERC20_APPROVE_FUNCTION, ERC20_INCREASE_ALLOWANCE_FUNCTION]) {
@@ -193,19 +191,13 @@ describe('AllowanceStore', () => {
           if (signature === ERC20_APPROVE_FUNCTION) {
             // we don't call allowance() method as it's always equals the approve amount
             await store.approve(token, owner, spender, amount, timestamp, blockNumber);
-          } else {
+          } else if (signature === ERC20_INCREASE_ALLOWANCE_FUNCTION) {
             mockTokenInstances[token].allowance.mockResolvedValueOnce(amount);
             await store.increaseAllowance(token, owner, spender, amount, timestamp, blockNumber);
           }
-
-          tokensApprovals[token] = tokensApprovals[token] || [];
-          tokensApprovals[token].push({ owner, amount, spender, timestamp });
         }
       }
     }
-
-    mockTokenInstance1.approvals = tokensApprovals[token1];
-    mockTokenInstance2.approvals = tokensApprovals[token2];
 
     const summaries = store.getSpenderSummaries();
 

@@ -60,6 +60,74 @@ describe('ERC20Token abstraction', () => {
     expect(receivedAllowance.toString()).toStrictEqual(allowance.toString());
   });
 
+  it('should return decimals', async () => {
+    const token = new ERC20Token('0xTOKENADDRESS', {} as any);
+    const decimals = 16;
+
+    mockContractImplementation = {
+      decimals: jest.fn().mockResolvedValueOnce(decimals)
+    };
+
+    const result = await token.decimals();
+
+    expect(result).toStrictEqual(decimals);
+    expect(mockContractImplementation.decimals).toHaveBeenCalledTimes(1);
+  });
+
+  it('should cache decimals', async () => {
+    const token = new ERC20Token('0xTOKENADDRESS', {} as any);
+    const decimals = 16;
+
+    mockContractImplementation = {
+      decimals: jest.fn().mockResolvedValueOnce(decimals)
+    };
+
+    let result = await token.decimals();
+
+    expect(result).toStrictEqual(decimals);
+    expect(mockContractImplementation.decimals).toHaveBeenCalledTimes(1);
+
+    mockContractImplementation.decimals.mockClear();
+    result = await token.decimals();
+
+    expect(result).toStrictEqual(decimals);
+    expect(mockContractImplementation.decimals).toHaveBeenCalledTimes(0);
+  });
+
+  it('should return symbol', async () => {
+    const token = new ERC20Token('0xTOKENADDRESS', {} as any);
+    const symbol = 'TKN';
+
+    mockContractImplementation = {
+      symbol: jest.fn().mockResolvedValueOnce(symbol)
+    };
+
+    const result = await token.symbol();
+
+    expect(result).toStrictEqual(symbol);
+    expect(mockContractImplementation.symbol).toHaveBeenCalledTimes(1);
+  });
+
+  it('should cache symbol', async () => {
+    const token = new ERC20Token('0xTOKENADDRESS', {} as any);
+    const symbol = 'TKN';
+
+    mockContractImplementation = {
+      symbol: jest.fn().mockResolvedValueOnce(symbol)
+    };
+
+    let result = await token.symbol();
+
+    expect(result).toStrictEqual(symbol);
+    expect(mockContractImplementation.symbol).toHaveBeenCalledTimes(1);
+
+    mockContractImplementation.symbol.mockClear();
+    result = await token.symbol();
+
+    expect(result).toStrictEqual(symbol);
+    expect(mockContractImplementation.symbol).toHaveBeenCalledTimes(0);
+  });
+
   it('should log approvals', async () => {
     const owner1 = '0xOWNER1';
     const owner2 = '0xOWNER2';
@@ -85,7 +153,7 @@ describe('ERC20Token abstraction', () => {
       timestamp
     };
 
-    // we don't need to know that since it will always be the same as approved amount
+    // we don't need to call that since allowance will always be the same as the approved amount
     expect(mockContractImplementation.allowance).toHaveBeenCalledTimes(0);
     expect(token.approvals).toStrictEqual([firstApproval]);
 
@@ -106,7 +174,7 @@ describe('ERC20Token abstraction', () => {
     expect(token.approvals).toStrictEqual([firstApproval, secondApproval]);
   });
 
-  it('should return 0 for non-ERC20 contracts', async () => {
+  it('should return 0 when calling allowance() and balanceOf() for non-ERC20 contracts', async () => {
     const owner = '0xOWNER';
     const spender = '0xSPENDER';
     const token = new ERC20Token('0xTOKENADDRESS', {} as any);
@@ -121,5 +189,17 @@ describe('ERC20Token abstraction', () => {
 
     expect(balance.toString()).toBe('0');
     expect(allowance.toString()).toBe('0');
+  });
+
+  it('should return 1 when calling decimals() for non-ERC20 contracts', async () => {
+    const token = new ERC20Token('0xTOKENADDRESS', {} as any);
+
+    mockContractImplementation = {
+      decimals: jest.fn().mockRejectedValue('Not supported decimals()')
+    };
+
+    const decimals = await token.decimals();
+
+    expect(decimals.toString()).toBe('1');
   });
 });
