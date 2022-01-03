@@ -85,7 +85,7 @@ export class ERC20Token {
       return decimals;
     } catch {
       // Not an ERC20 token ¯\_(ツ)_/¯
-      this._decimals = 1;
+      this._decimals = 0;
       return this._decimals;
     }
   }

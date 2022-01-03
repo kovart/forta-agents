@@ -188,32 +188,23 @@ describe('ERC20Token abstraction', () => {
     expect(token.approvals).toStrictEqual([firstApproval, secondApproval]);
   });
 
-  it('should return 0 when calling allowance() and balanceOf() for non-ERC20 contracts', async () => {
+  it('should return 0 when calling allowance(), balanceOf() and decimals() for non-ERC20 contracts', async () => {
     const owner = '0xOWNER';
     const spender = '0xSPENDER';
     const token = new ERC20Token('0xTOKENADDRESS', {} as any);
 
     mockContractImplementation = {
       balanceOf: jest.fn().mockRejectedValue('Not supported balanceOf()'),
-      allowance: jest.fn().mockRejectedValue('Not supported allowance()')
+      allowance: jest.fn().mockRejectedValue('Not supported allowance()'),
+      decimals: jest.fn().mockRejectedValue('Not supported decimals()')
     };
 
     const balance = await token.balanceOf(owner, 123);
     const allowance = await token.allowance(owner, spender, 123);
+    const decimals = await token.decimals();
 
     expect(balance.toString()).toBe('0');
     expect(allowance.toString()).toBe('0');
-  });
-
-  it('should return 1 when calling decimals() for non-ERC20 contracts', async () => {
-    const token = new ERC20Token('0xTOKENADDRESS', {} as any);
-
-    mockContractImplementation = {
-      decimals: jest.fn().mockRejectedValue('Not supported decimals()')
-    };
-
-    const decimals = await token.decimals();
-
-    expect(decimals.toString()).toBe('1');
+    expect(decimals.toString()).toBe('0');
   });
 });
