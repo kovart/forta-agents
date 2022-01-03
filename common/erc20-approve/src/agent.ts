@@ -105,7 +105,7 @@ function provideHandleBlock(dependenciesConfig: AgentDependenciesConfig): Handle
       ) {
         const affectedTokens = await Promise.all(
           tokens.map(async (token) => ({
-            amount: amounts[token.address].div(await token.decimals()),
+            amount: amounts[token.address].div(await token.denominator()),
             symbol: await token.symbol(),
             address: token.address
           }))

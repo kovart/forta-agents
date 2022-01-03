@@ -319,6 +319,7 @@ describe('erc20 approval phishing agent', () => {
       const tokenAddress = createAddress('0x4');
       const tokenSymbol = 'TKN';
       const tokenDecimals = 18;
+      const tokenDenominator = new BigNumber(10).pow(tokenDecimals);
       const amount = new BigNumber(100);
       const approvals = 4;
 
@@ -334,7 +335,8 @@ describe('erc20 approval phishing agent', () => {
             {
               address: tokenAddress,
               symbol: jest.fn().mockResolvedValue(tokenSymbol),
-              decimals: jest.fn().mockResolvedValue(tokenDecimals)
+              decimals: jest.fn().mockResolvedValue(tokenDecimals),
+              denominator: jest.fn().mockResolvedValue(tokenDenominator)
             }
           ]
         }
@@ -349,7 +351,7 @@ describe('erc20 approval phishing agent', () => {
         [
           {
             address: tokenAddress,
-            amount: amount.div(tokenDecimals),
+            amount: amount.div(tokenDenominator),
             symbol: tokenSymbol
           }
         ]
@@ -363,6 +365,127 @@ describe('erc20 approval phishing agent', () => {
       expect(findings).toStrictEqual([finding]);
     });
 
+    it('should return multiple findings', async () => {
+      const autoAddress: () => string = (() => {
+        let index = 1;
+        return () => createAddress('0x' + index++);
+      })();
+
+      const createToken = (symbol: string, decimals: number) => ({
+        address: autoAddress(),
+        symbol: symbol,
+        decimals: decimals,
+        denominator: new BigNumber(10).pow(decimals)
+      });
+
+      const createTokenInstance = (token: {
+        address: string;
+        symbol: string;
+        decimals: number;
+        denominator: BigNumber;
+      }) => ({
+        address: token.address,
+        symbol: jest.fn().mockResolvedValue(token.symbol),
+        decimals: jest.fn().mockResolvedValue(token.decimals),
+        denominator: jest.fn().mockResolvedValue(token.denominator)
+      });
+
+      const createSummary = (
+        spender: string,
+        owners: string[],
+        tokens: any[],
+        amounts: BigNumber[],
+        approvals: number
+      ) => {
+        return {
+          address: spender,
+          owners: owners,
+          amounts: Object.assign({}, ...tokens.map((t, i) => ({ [t.address]: amounts[i] }))),
+          tokens: tokens.map((t) => createTokenInstance(t)),
+          approvalsCount: approvals
+        };
+      };
+
+      const [token1, token2] = [createToken('TKN1', 16), createToken('TKN2', 8)];
+      const [owner1, owner2] = [autoAddress(), autoAddress()];
+      const approvalsThreshold = 3;
+
+      const spender1 = {
+        address: autoAddress(),
+        tokens: [token1, token2],
+        amounts: [new BigNumber(100), new BigNumber(200)],
+        owners: [owner1, owner2],
+        approvals: approvalsThreshold + 1
+      };
+
+      const spender2 = {
+        address: autoAddress(),
+        tokens: [token1],
+        amounts: [new BigNumber(12345)],
+        owners: [owner2],
+        approvals: approvalsThreshold
+      };
+
+      const spender3 = {
+        address: autoAddress(),
+        tokens: [token2],
+        amounts: [new BigNumber(333)],
+        owners: [owner2],
+        approvals: approvalsThreshold + 2
+      };
+
+      const [summary1, summary2, summary3] = [spender1, spender2, spender3].map((spender) =>
+        createSummary(
+          spender.address,
+          spender.owners,
+          spender.tokens,
+          spender.amounts,
+          spender.approvals
+        )
+      );
+
+      mockDependenciesConfig.callsThreshold = approvalsThreshold;
+      mockDependenciesConfig.registry.isExchange.mockResolvedValue(false);
+      mockDependenciesConfig.store.getSpenderSummaries.mockReturnValue([
+        summary1,
+        summary2,
+        summary3
+      ]);
+
+      const findings = await handleBlock(txBlock);
+
+      expect(findings).toHaveLength(2);
+
+      const finding1 = createPhishingFinding(
+        spender1.approvals,
+        spender1.address,
+        spender1.owners,
+        summary1.tokens.map((t, i) => ({
+          address: spender1.tokens[i].address,
+          amount: spender1.amounts[i].div(spender1.tokens[i].denominator),
+          symbol: spender1.tokens[i].symbol
+        }))
+      );
+
+      const finding2 = createPhishingFinding(
+        spender3.approvals,
+        spender3.address,
+        spender3.owners,
+        summary3.tokens.map((t, i) => ({
+          address: spender3.tokens[i].address,
+          amount: spender3.amounts[i].div(spender3.tokens[i].denominator),
+          symbol: spender3.tokens[i].symbol
+        }))
+      );
+
+      findings[0].metadata.tokens = JSON.parse(findings[0].metadata.tokens);
+      findings[1].metadata.tokens = JSON.parse(findings[1].metadata.tokens);
+      finding1.metadata.tokens = JSON.parse(finding1.metadata.tokens);
+      finding2.metadata.tokens = JSON.parse(finding2.metadata.tokens);
+
+      expect(findings).toStrictEqual([finding1, finding2]);
+    });
+
     it('should return empty findings if attacker has no new approvals', async () => {
       const spender = createAddress('0x1');
       const owner1 = createAddress('0x2');
@@ -370,6 +493,7 @@ describe('erc20 approval phishing agent', () => {
       const tokenAddress = createAddress('0x4');
       const tokenSymbol = 'TKN';
       const tokenDecimals = 18;
+      const tokenDenominator = new BigNumber(10).pow(tokenDecimals);
       const amount = new BigNumber(100);
       const approvals = 4;
 
@@ -385,7 +509,8 @@ describe('erc20 approval phishing agent', () => {
             {
               address: tokenAddress,
               symbol: jest.fn().mockResolvedValue(tokenSymbol),
-              decimals: jest.fn().mockResolvedValue(tokenDecimals)
+              decimals: jest.fn().mockResolvedValue(tokenDecimals),
+              denominator: jest.fn().mockResolvedValue(tokenDenominator)
             }
           ]
         }
@@ -407,6 +532,7 @@ describe('erc20 approval phishing agent', () => {
       const tokenAddress = createAddress('0x4');
       const tokenSymbol = 'TKN';
       const tokenDecimals = 18;
+      const tokenDenominator = new BigNumber(10).pow(tokenDecimals);
       const amount = new BigNumber(100);
       const approvals = 4;
 
@@ -424,7 +550,8 @@ describe('erc20 approval phishing agent', () => {
             {
               address: tokenAddress,
               symbol: jest.fn().mockResolvedValue(tokenSymbol),
-              decimals: jest.fn().mockResolvedValue(tokenDecimals)
+              decimals: jest.fn().mockResolvedValue(tokenDecimals),
+              denominator: jest.fn().mockResolvedValue(tokenDenominator)
             }
           ],
           approvalsCount: approvals
@@ -438,80 +565,6 @@ describe('erc20 approval phishing agent', () => {
       await handleBlock(txBlock);
 
       expect(mockDependenciesConfig.store.clearOutdatedData).toBeCalledWith(0, [spender]);
-    });
-
-    it('should return multiple findings', async () => {
-      const spender1 = createAddress('0x1');
-      const spender2 = createAddress('0x2');
-      const owner1 = createAddress('0x3');
-      const owner2 = createAddress('0x4');
-      const tokenAddress = createAddress('0x5');
-      const tokenSymbol = 'TKN';
-      const tokenDecimals = 18;
-      const amount = new BigNumber(100);
-      const approvals = 4;
-
-      const tokenInstance = {
-        address: tokenAddress,
-        symbol: jest.fn().mockResolvedValue(tokenSymbol),
-        decimals: jest.fn().mockResolvedValue(tokenDecimals)
-      };
-
-      mockDependenciesConfig.callsThreshold = approvals - 1;
-      mockDependenciesConfig.registry.isExchange.mockResolvedValue(false);
-      mockDependenciesConfig.store.getSpenderSummaries.mockReturnValue([
-        {
-          address: spender1,
-          owners: [owner1, owner2],
-          amounts: { [tokenAddress]: amount },
-          tokens: [tokenInstance],
-          approvalsCount: approvals
-        },
-        {
-          address: spender2,
-          owners: [owner1],
-          amounts: { [tokenAddress]: amount },
-          tokens: [tokenInstance],
-          approvalsCount: approvals
-        }
-      ]);
-
-      const findings = await handleBlock(txBlock);
-
-      expect(findings).toHaveLength(2);
-
-      const finding1 = createPhishingFinding(
-        approvals,
-        spender1,
-        [owner1, owner2],
-        [
-          {
-            address: tokenAddress,
-            amount: amount.div(tokenDecimals),
-            symbol: tokenSymbol
-          }
-        ]
-      );
-
-      const finding2 = createPhishingFinding(
-        approvals,
-        spender2,
-        [owner1],
-        [
-          {
-            address: tokenAddress,
-            amount: amount.div(tokenDecimals),
-            symbol: tokenSymbol
-          }
-        ]
-      );
-
-      findings[0].metadata.tokens = JSON.parse(findings[0].metadata.tokens);
-      findings[1].metadata.tokens = JSON.parse(findings[1].metadata.tokens);
-      finding1.metadata.tokens = JSON.parse(finding1.metadata.tokens);
-      finding2.metadata.tokens = JSON.parse(finding2.metadata.tokens);
-
-      expect(findings).toStrictEqual([finding1, finding2]);
     });
   });
 });

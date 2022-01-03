@@ -40,7 +40,7 @@ export class ERC20Token {
   }
 
   public async allowance(owner: string, spender: string, blockTag: number | string) {
-    const contract = this.getContract();
+    const contract = this._getContract();
     try {
       return new BigNumber((await contract.allowance(owner, spender, { blockTag })).toHexString());
     } catch {
@@ -50,7 +50,7 @@ export class ERC20Token {
   }
 
   public async balanceOf(address: string, blockTag: number | string) {
-    const contract = this.getContract();
+    const contract = this._getContract();
     try {
       const balance = await contract.balanceOf(address, { blockTag });
       return new BigNumber(balance.toHexString());
@@ -64,7 +64,7 @@ export class ERC20Token {
     if (this._symbol) return this._symbol;
 
     try {
-      const contract = this.getContract();
+      const contract = this._getContract();
       const symbol = await contract.symbol();
       this._symbol = symbol;
       return symbol;
@@ -79,7 +79,7 @@ export class ERC20Token {
     if (this._decimals) return this._decimals;
 
     try {
-      const contract = this.getContract();
+      const contract = this._getContract();
       const decimals = await contract.decimals();
       this._decimals = decimals;
       return decimals;
@@ -88,6 +88,11 @@ export class ERC20Token {
       this._decimals = 1;
       return this._decimals;
     }
+  }
+
+  public async denominator(): Promise<BigNumber> {
+    const decimals = await this.decimals();
+    return new BigNumber(10).pow(decimals);
   }
 
   private _approve(owner: string, spender: string, amount: BigNumber, timestamp: number) {
@@ -99,7 +104,7 @@ export class ERC20Token {
     });
   }
 
-  private getContract() {
+  private _getContract() {
     if (this._contract) return this._contract;
 
     const iface = new ethers.utils.Interface(Erc20Abi);

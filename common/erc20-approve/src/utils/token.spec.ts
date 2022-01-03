@@ -94,6 +94,20 @@ describe('ERC20Token abstraction', () => {
     expect(mockContractImplementation.decimals).toHaveBeenCalledTimes(0);
   });
 
+  it('should return denominator', async () => {
+    const token = new ERC20Token('0xTOKENADDRESS', {} as any);
+    const decimals = 16;
+
+    mockContractImplementation = {
+      decimals: jest.fn().mockResolvedValueOnce(decimals)
+    };
+
+    const result = await token.denominator();
+
+    expect(result).toStrictEqual(new BigNumber(10).pow(decimals));
+    expect(mockContractImplementation.decimals).toHaveBeenCalledTimes(1);
+  });
+
   it('should return symbol', async () => {
     const token = new ERC20Token('0xTOKENADDRESS', {} as any);
     const symbol = 'TKN';
