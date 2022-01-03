@@ -1,4 +1,4 @@
-# Forta ERC20 Approval Agent
+# Forta ERC20 Allowance Agent
 
 ## Description
 

@@ -1,7 +1,7 @@
 {
   "name": "forta-erc20-eoa-allowance",
   "version": "0.0.1",
-  "description": "Forta ERC20 Approval Agent",
+  "description": "Forta agent that detects possible phishing attacks on ERC-20 compatible tokens",
   "scripts": {
     "build": "tsc",
     "start": "npm run start:dev",
@@ -21,7 +21,6 @@
   "dependencies": {
     "axios": "^0.24.0",
     "bignumber.js": "^9.0.1",
-    "eslint-config-prettier": "^7.2.0",
     "ethers": "^5.5.2",
     "forta-agent": "^0.0.33"
   },
@@ -29,6 +28,7 @@
     "@types/jest": "^27.0.1",
     "@types/nodemon": "^1.19.0",
     "@typescript-eslint/eslint-plugin": "^5.8.0",
+    "eslint-config-prettier": "^7.2.0",
     "@typescript-eslint/parser": "^5.8.0",
     "eslint": "^7.32.0",
     "forta-agent-tools": "^1.0.32",
