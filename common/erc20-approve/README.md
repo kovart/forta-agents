@@ -1,4 +1,4 @@
-# Forta ERC20 Allowance Agent
+# Forta ERC-20 Allowance Agent
 
 ## Description
 
@@ -55,14 +55,14 @@ File with configurable variables [is placed here](./src/configs/agent-config.jso
 - KOVART-ERC-20-EOA-ALLOWANCE-0
     - Fired when detected a high number (`callsThreshold`) of EOA's call the 
     `approve()` and `increaseAllowance()` methods for the same target EOA over `secondsKeepApprovals`
-    - Severity is always set to `high`
-    - Type is always set to `suspicious`
+    - Severity is always set to `"high"`
+    - Type is always set to `"suspicious"`
     - Metadata:
-        - `attacker`: address of the target EOA 
-        - `tokens`: a stringified JSON array of token objects with amounts of tokens involved
+        - `"attacker"`: address of the target EOA 
+        - `"tokens"`: a stringified JSON array of token objects with amounts of tokens involved
             - Token object: `{ address, symbol, amount }`
-        - `approvalsCount`: number of the approval calls to the attacker EOA
-        - `affectedAddresses`: a stringified JSON array of affected addresses
+        - `"approvalsCount"`: number of the approval calls to the attacker EOA
+        - `"affectedAddresses"`: a stringified JSON array of affected addresses
 
 ## Test data
 
