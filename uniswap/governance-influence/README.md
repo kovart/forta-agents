@@ -2,11 +2,7 @@
 
 ## Description
 
-This agent detects possible phishing attacks on ERC-20 compatible tokens. 
-
-Typically, the behavior of users approving the transfer of tokens to an address belonging to an externally owned address (EOA) can indicate a phishing attack.
-The agent detects a high number (e.g. 10 or more) of EOA's call the `appove()` and `increaseAllowance()` 
-methods for the same target EOA over an extended period of time (6 hours). 
+This agent detects possible phishing attacks on ERC-20 compatible tokens.
 
 ---
 
@@ -14,7 +10,7 @@ Example phishing attack: [BadgerDAO](https://rekt.news/badger-rekt/)
 
 ## Configs
 
-File with configurable variables [is placed here](./src/configs/agent-config.json).
+File with configurable variables [is placed here](src/configs/agent-config.json).
 
 ##### callsThreshold: `number`
 
