@@ -16,7 +16,7 @@ File with configurable variables [is placed here](src/configs/agent-config.json)
 
 ##### votesChangeThreshold: `number`
 
-- Amount of changed votes, after which the agent starts firing alerts.
+- Amount of changed voting power, after which the agent starts firing alerts.
 - Default `10000`
 
 ##### observableBlocksBeforeProposalCreated: `number`
