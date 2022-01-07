@@ -1,0 +1,9 @@
+{
+  "everestId": "0xa2e07f422b5d7cbbfca764e53b251484ecf945fa",
+  "protocolName": "Uniswap V3",
+  "votesChangeThreshold": 10000,
+  "observableBlocksAfterVoteCast": 100,
+  "observableBlocksBeforeProposalCreated": 100,
+  "uniTokenAddress": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+  "governorBravoAddress": "0x408ED6354d4973f66138C91495F2f2FCbd8724C3"
+}
