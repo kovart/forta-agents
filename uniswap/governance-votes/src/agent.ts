@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { providers, Contract, utils } from 'ethers';
+import { Contract, utils, providers } from 'ethers';
 import { abi as UniTokenAbi } from '@uniswap/governance/build/Uni.json';
 import {
   HandleTransaction,
@@ -7,7 +7,7 @@ import {
   BlockEvent,
   TransactionEvent,
   Finding,
-  getEthersProvider
+  getJsonRpcUrl
 } from 'forta-agent';
 import Findings from './findings';
 import { DELEGATE_VOTES_CHANGED_EVENT, PROPOSAL_CREATED_EVENT, VOTE_CAST_EVENT } from './constants';
@@ -16,9 +16,10 @@ import { AgentDependenciesConfig } from './types';
 // basic configuration variables
 import agentConfig from './configs/agent-config.json';
 
-const provider = getEthersProvider();
-
 const dependenciesConfig: AgentDependenciesConfig = {} as AgentDependenciesConfig;
+
+// set up provider for contract interaction
+const provider = new providers.JsonRpcProvider(getJsonRpcUrl());
 
 function provideInitialize(
   dependenciesConfig: AgentDependenciesConfig,
@@ -43,15 +44,14 @@ function provideInitialize(
     dependenciesConfig.observableBlocksAfterVoteCast = observableBlocksAfterVoteCast;
     dependenciesConfig.observableBlocksBeforeProposalCreated =
       observableBlocksBeforeProposalCreated;
-
     // normalize UNI amount
     dependenciesConfig.votesChangeThreshold = new BigNumber(votesChangeThreshold).multipliedBy(
       new BigNumber(10).pow(18)
     );
 
     const uniTokenIface = new utils.Interface(UniTokenAbi);
-
     dependenciesConfig.uniToken = new Contract(uniTokenAddress, uniTokenIface, provider);
+
     dependenciesConfig.store = { proposalsMap: {}, votersMap: {}, votesMap: {} };
 
     dependenciesConfig.isInitialized = true;
@@ -74,29 +74,28 @@ function provideHandleBlock(config: AgentDependenciesConfig): HandleBlock {
 
     // clear ended proposals
     for (const [proposalId, proposalMeta] of [...Object.entries(proposalsMap)]) {
-      // we add observableBlocks since we can use proposal meta
-      // to check the latest voters after the proposal has ended
+      // we add `observableBlocks` to `endBlock` to calculate the max block number
+      // when the voters are still observable
       if (blockEvent.blockNumber > proposalMeta.endBlock + observableBlocksAfterVoteCast) {
         delete proposalsMap[proposalId];
       }
     }
 
-    for (const [voter, voterProposals] of [...Object.entries(votersMap)]) {
-      for (const [proposalId, voteCast] of [...Object.entries(voterProposals)]) {
+    for (const [voter, voterProposalsMap] of [...Object.entries(votersMap)]) {
+      for (const [proposalId, voteCast] of [...Object.entries(voterProposalsMap)]) {
         if (
-          // if the proposal has ended
+          // if the proposal has cleared
           !proposalsMap[proposalId] ||
           // if the observation period for the current voter has ended
           blockEvent.blockNumber > voteCast.blockNumber + observableBlocksAfterVoteCast
         ) {
-          delete voterProposals[proposalId];
+          delete voterProposalsMap[proposalId];
           continue;
         }
 
-        const { support, votes } = voteCast;
+        const currentVotes = votesMap[voter]; // after DelegateVotesChanged events
 
-        const currentVotes = votesMap[voter];
-        const delta = currentVotes.minus(votes).negated();
+        const delta = currentVotes.minus(voteCast.votes).negated();
 
         // check if we break through the threshold
         if (delta.isLessThanOrEqualTo(votesChangeThreshold)) continue;
@@ -109,16 +108,16 @@ function provideHandleBlock(config: AgentDependenciesConfig): HandleBlock {
             voter,
             currentVotes,
             delta,
-            support,
+            voteCast.support,
             observableBlocksAfterVoteCast
           )
         );
         // we've pushed an alert so we no longer need to observe this voter/proposer
-        delete voterProposals[proposalId];
+        delete voterProposalsMap[proposalId];
       }
 
-      // clear data if voter no longer has observable proposals
-      if (!Object.values(voterProposals || {}).length) {
+      // clear data if the voter no longer has observed proposals
+      if (!Object.values(voterProposalsMap || {}).length) {
         delete votersMap[voter];
         delete votesMap[voter];
       }
@@ -184,20 +183,13 @@ function provideHandleTransaction(config: AgentDependenciesConfig): HandleTransa
         // ----------------------------------
 
         const proposalId = log.args.proposalId.toString();
+        const proposal = proposalsMap[proposalId];
         const votes = new BigNumber(log.args.votes.toHexString());
         const support = Number(log.args.support.toString());
         const voter = log.args.voter.toLowerCase();
 
         // if the agent is started after the proposal was created
-        if (!proposalsMap[proposalId]) continue;
-
-        const proposal = proposalsMap[proposalId];
-        // calc the oldest observable block
-        const priorBlockNumber = proposal.startBlock - observableBlocksBeforeProposalCreated;
-        // get votes in the oldest observable block
-        const priorBlockVotes = new BigNumber(
-          (await uniToken.getPriorVotes(voter, priorBlockNumber)).toHexString()
-        );
+        if (!proposal) continue;
 
         votesMap[voter] = votes;
         votersMap[voter] = votersMap[voter] || {};
@@ -206,6 +198,18 @@ function provideHandleTransaction(config: AgentDependenciesConfig): HandleTransa
           support: support,
           votes: votes
         };
+
+        // calc the oldest observable block
+        let priorBlockNumber = proposal.startBlock - observableBlocksBeforeProposalCreated;
+
+        if (priorBlockNumber < 0) {
+          priorBlockNumber = 0;
+        }
+
+        // get votes in the oldest observable block
+        const priorBlockVotes = new BigNumber(
+          (await uniToken.getPriorVotes(voter, priorBlockNumber)).toHexString()
+        );
 
         const delta = votes.minus(priorBlockVotes);
 

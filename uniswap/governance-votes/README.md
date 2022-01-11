@@ -2,13 +2,13 @@
 
 ## Description
 
-Forta agent that detects significant increase of voting power before
-the proposal was created and after the vote is cast by more than a given threshold.
+This agent monitors [Uniswap Governance](https://uniswap.org/governance) protocol and detects a significant increase of voting power before the proposal was created, 
+and a decrease after the vote is cast. 
 
----
+## Features
 
-The idea of the agent is to detect a temporary increase or decrease in the number of voting power
-that can be used to manipulate the governance.
+- Minimum API calls
+- Memory optimizations
 
 ## Configs
 
@@ -16,8 +16,8 @@ File with configurable variables [is placed here](src/configs/agent-config.json)
 
 ##### votesChangeThreshold: `number`
 
-- Amount of changed votes, after which the agent starts firing alerts.
-- Default `10000`
+- Amount of changed voting power, after which the agent starts firing alerts.
+- Default `10,000` UNI
 
 ##### observableBlocksBeforeProposalCreated: `number`
 
@@ -28,11 +28,6 @@ File with configurable variables [is placed here](src/configs/agent-config.json)
 
 - The number of blocks in which the agent checks for decrease in voting power after vote is cast.
 - Default `100` blocks
-
-## Features
-
-- Minimum API calls
-- Memory optimizations
 
 ## Supported Chains
 
