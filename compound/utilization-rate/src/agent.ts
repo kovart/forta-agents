@@ -4,7 +4,7 @@ import Web3 from 'web3';
 import { CompoundUtils, TokenRateStorage, formatNumber } from './utils';
 
 export const EVENT_ALERT_ID = 'COMP-UTILIZATION-RATE-0';
-export const ALERT_CHANGE_RATE = 0.1; // alert if changed by 20% or more
+export const ALERT_CHANGE_RATE = 0.1; // alert if changed by 10% or more
 export const WATCH_INTERVAL = 60 * 60; // seconds (60 minutes window)
 export const WATCH_TOKENS = ['cUSDC', 'cDAI', 'cETH']; // cToken pools
 
