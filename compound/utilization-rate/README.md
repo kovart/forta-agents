@@ -1,4 +1,4 @@
-# Compound Utilization Rate Token
+# Compound Utilization Rate Agent
 
 ## Description
 
