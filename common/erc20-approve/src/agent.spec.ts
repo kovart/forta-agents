@@ -12,12 +12,7 @@ import Agent from './agent';
 
 const { provideInitialize, provideHandleTransaction, provideHandleBlock } = Agent;
 
-type MockedDependenciesConfig = {
-  secondsKeepApprovals: number;
-  secondsKeepFindings: number;
-  secondsRegistryCache: number;
-  callsThreshold: number;
-  isInitialized: boolean;
+type MockedDependenciesConfig = AgentDependenciesConfig & {
   registry: {
     isContract: jest.Mock;
     isExchange: jest.Mock;
@@ -263,17 +258,17 @@ describe('erc20 approval phishing agent', () => {
 
   describe('handleBlock', () => {
     let handleBlock: HandleBlock;
-    let txBlock: TestBlockEvent;
+    let blockEvent: TestBlockEvent;
 
     beforeEach(() => {
-      txBlock = new TestBlockEvent();
+      blockEvent = new TestBlockEvent();
       handleBlock = provideHandleBlock(mockDependenciesConfig as any);
     });
 
     it('should throw error on non-initialized dependencies config', async () => {
       mockDependenciesConfig.isInitialized = false;
 
-      await expect(handleBlock(txBlock)).rejects.toThrow();
+      await expect(handleBlock(blockEvent)).rejects.toThrow();
     });
 
     it("should return empty findings if number of approvals doesn't exceed threshold", async () => {
@@ -296,7 +291,7 @@ describe('erc20 approval phishing agent', () => {
         }
       ]);
 
-      const findings = await handleBlock(txBlock);
+      const findings = await handleBlock(blockEvent);
 
       expect(findings).toStrictEqual([]);
     });
@@ -305,9 +300,9 @@ describe('erc20 approval phishing agent', () => {
       mockDependenciesConfig.secondsKeepApprovals = 100;
       mockDependenciesConfig.store.getSpenderSummaries.mockImplementation(() => []);
 
-      txBlock.setTimestamp(100);
+      blockEvent.setTimestamp(100);
 
-      await handleBlock(txBlock);
+      await handleBlock(blockEvent);
 
       expect(mockDependenciesConfig.store.clearOutdatedData).toBeCalledWith(0, []);
     });
@@ -342,7 +337,7 @@ describe('erc20 approval phishing agent', () => {
         }
       ]);
 
-      const findings = await handleBlock(txBlock);
+      const findings = await handleBlock(blockEvent);
 
       const finding = createPhishingFinding(
         approvals,
@@ -452,7 +447,7 @@ describe('erc20 approval phishing agent', () => {
         summary3
       ]);
 
-      const findings = await handleBlock(txBlock);
+      const findings = await handleBlock(blockEvent);
 
       expect(findings).toHaveLength(2);
 
@@ -516,16 +511,16 @@ describe('erc20 approval phishing agent', () => {
         }
       ]);
 
-      let findings = await handleBlock(txBlock);
+      let findings = await handleBlock(blockEvent);
 
       expect(findings).toHaveLength(1);
 
-      findings = await handleBlock(txBlock);
+      findings = await handleBlock(blockEvent);
 
       expect(findings).toStrictEqual([]);
     });
 
-    it('should pass detected attackers as permanent spenders to store.clearOutdatedData()', async () => {
+    it('should pass attackers to store.clearOutdatedData()', async () => {
       const spender = createAddress('0x1');
       const owner1 = createAddress('0x2');
       const owner2 = createAddress('0x3');
@@ -536,8 +531,9 @@ describe('erc20 approval phishing agent', () => {
       const amount = new BigNumber(100);
       const approvals = 4;
 
-      txBlock.setTimestamp(10);
+      blockEvent.setTimestamp(10);
 
+      mockDependenciesConfig.secondsKeepFindings = 10;
       mockDependenciesConfig.secondsKeepApprovals = 10;
       mockDependenciesConfig.callsThreshold = approvals - 1;
       mockDependenciesConfig.registry.isExchange.mockResolvedValue(false);
@@ -558,11 +554,11 @@ describe('erc20 approval phishing agent', () => {
         }
       ]);
 
-      const findings = await handleBlock(txBlock);
+      const findings = await handleBlock(blockEvent);
 
       expect(findings).toHaveLength(1);
 
-      await handleBlock(txBlock);
+      await handleBlock(blockEvent);
 
       expect(mockDependenciesConfig.store.clearOutdatedData).toBeCalledWith(0, [spender]);
     });
