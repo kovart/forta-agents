@@ -2,7 +2,7 @@
 
 ## Description
 
-This agent monitors Ethereum network and alert if cToken exchange rate has changed.
+This agent monitors Ethereum network and alerts if cToken exchange rate has changed.
 
 ## Compound Configs
 
