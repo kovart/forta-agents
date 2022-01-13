@@ -2,50 +2,80 @@ import {
   Finding,
   FindingSeverity,
   FindingType,
-  HandleTransaction,
-  TransactionEvent
+  Network,
+  TransactionEvent,
+  HandleTransaction
 } from 'forta-agent';
-import { CompoundNetworkNames, CompoundHelper } from './utils';
+import { CompoundNetworkConfigs, CompoundRegistry } from './utils';
+import { BlackListEntry, CompoundAddressEntry } from './types';
 
-export const COMPOUND_NETWORK = CompoundNetworkNames.MAINNET;
-export const BLACKLISTED_ADDRESSES = [
-  '0x539e978ad34def1eadf018524a260ab14a7e4122',
-  '0x4585fe77225b41b697c938b018e2ac67ac5a20c0'
-];
+import blacklist from './data/blacklist.json';
+const compound = new CompoundRegistry(CompoundNetworkConfigs[Network.MAINNET]);
 
-const compound = new CompoundHelper(COMPOUND_NETWORK);
+function provideHandleTransaction(
+  compound: CompoundRegistry,
+  blacklist: BlackListEntry[]
+): HandleTransaction {
+  const blacklistedEntriesMap: { [addr: string]: BlackListEntry } = {};
 
-const handleTransaction: HandleTransaction = async (txEvent: TransactionEvent) => {
-  const findings: Finding[] = [];
+  blacklist.forEach((entry) => {
+    const address = entry.address.toLowerCase();
+    blacklistedEntriesMap[address] = { address, comment: entry.comment };
+  });
 
-  const txAddresses = Object.keys(txEvent.addresses);
+  return async function handleTransaction(txEvent: TransactionEvent) {
+    const findings: Finding[] = [];
 
-  const blacklistedAddresses = txAddresses.filter((addr) => BLACKLISTED_ADDRESSES.includes(addr));
-  const compoundAddresses = txAddresses
-    .map((addr) => compound.getAddressInfo(addr))
-    .filter((v) => !!v);
+    if (!txEvent.status) return findings;
 
-  if (blacklistedAddresses.length > 0 && compoundAddresses.length > 0) {
-    findings.push(
-      Finding.fromObject({
-        name: 'Compound Blacklisted Address',
-        description: `Compound transaction involving a blacklisted addresses: [${blacklistedAddresses.join(', ')}]`,
-        alertId: 'COMP-BLACKLIST',
-        severity: FindingSeverity.High,
-        type: FindingType.Suspicious,
-        metadata: {
-          blacklistedAddresses: `[${blacklistedAddresses.map((a) => a).join(', ')}]`,
-          compoundAddresses: `[${compoundAddresses
-            .map((a) => `${a.address} (${a.name || a.path})`)
-            .join(', ')}]`
-        }
+    const txAddresses = Object.keys(txEvent.addresses);
+    const blacklistedAddressEntries = txAddresses
+      .map((addr) => blacklistedEntriesMap[addr.toLowerCase()])
+      .filter((v) => !!v);
+
+    if (!blacklistedAddressEntries.length) return findings;
+
+    const compoundAddressEntries = txAddresses
+      .map((address) => {
+        address = address.toLowerCase();
+        return !blacklistedEntriesMap[address] && compound.getAddressEntry(address);
       })
-    );
-  }
+      .filter((v) => !!v) as unknown as CompoundAddressEntry[];
 
-  return findings;
-};
+    if (compoundAddressEntries.length > 0) {
+      findings.push(createFinding(blacklistedAddressEntries, compoundAddressEntries));
+    }
+
+    return findings;
+  };
+}
+
+function createFinding(
+  blacklistedAddressEntries: BlackListEntry[],
+  compoundAddressEntries: CompoundAddressEntry[]
+) {
+  const formattedBlacklistedAddresses = blacklistedAddressEntries.map((e) => e.address).join(', ');
+  const formattedAddressWord = blacklistedAddressEntries.length > 1 ? 'addresses' : 'address';
+
+  return Finding.fromObject({
+    name: 'Compound Interaction with a Blacklisted Address',
+    description:
+      `Compound Protocol was involved in a transaction ` +
+      `with blacklisted ${formattedAddressWord}: ${formattedBlacklistedAddresses}`,
+    alertId: 'KOVART-COMPOUND-BLACKLIST',
+    everestId: '0x9c6983d688f1f65ad6224c8151f3c89dd39e6472',
+    protocol: 'Compound',
+    severity: FindingSeverity.High,
+    type: FindingType.Suspicious,
+    metadata: {
+      blacklistedAddresses: JSON.stringify(blacklistedAddressEntries),
+      compoundAddresses: JSON.stringify(compoundAddressEntries)
+    }
+  });
+}
 
 export default {
-  handleTransaction
+  createFinding,
+  provideHandleTransaction,
+  handleTransaction: provideHandleTransaction(compound, blacklist)
 };
