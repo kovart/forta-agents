@@ -174,6 +174,9 @@ describe('erc20 approval phishing agent', () => {
       const contractAddress = createAddress('0x1');
 
       txEvent.setFrom(contractAddress);
+      txEvent.addTraces(
+        createTrace(ERC20_APPROVE_FUNCTION, [createAddress('0x1'), 100], createAddress('0x2'))
+      );
 
       mockDependenciesConfig.registry.isContract.mockImplementation(
         (address: string) => address === contractAddress

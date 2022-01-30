@@ -138,9 +138,6 @@ function provideHandleTransaction(config: AgentDependenciesConfig): HandleTransa
 
     if (!toAddress) return [];
 
-    // Ignore transactions from a smart contract
-    if (await registry.isContract(fromAddress)) return [];
-
     const functions = [
       {
         calls: txEvent.filterFunction(ERC20_APPROVE_FUNCTION),
@@ -151,6 +148,12 @@ function provideHandleTransaction(config: AgentDependenciesConfig): HandleTransa
         log: store.increaseAllowance.bind(store)
       }
     ];
+
+    // Check if transactions contain interesting calls to minimize calls to isContract()
+    if (!functions.find((f) => f.calls.length > 0)) return [];
+
+    // Ignore transactions from a smart contract
+    if (await registry.isContract(fromAddress)) return [];
 
     for (const fn of functions) {
       for (const call of fn.calls) {
