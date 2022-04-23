@@ -2,10 +2,10 @@ import Web3 from 'web3';
 import { getJsonRpcUrl, Network } from 'forta-agent';
 import { CompoundAddressEntry } from './types';
 
-import GoerliConfig from 'compound-config/networks/goerli.json';
-import MainnetConfig from 'compound-config/networks/mainnet.json';
-import RinkebyConfig from 'compound-config/networks/rinkeby.json';
-import RopstenConfig from 'compound-config/networks/ropsten.json';
+import GoerliConfig from './config/goerli.json';
+import MainnetConfig from './config/mainnet.json';
+import RinkebyConfig from './config/rinkeby.json';
+import RopstenConfig from './config/ropsten.json';
 
 export const web3 = new Web3(getJsonRpcUrl());
 

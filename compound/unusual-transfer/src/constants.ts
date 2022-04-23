@@ -1,13 +1,13 @@
 import { Network } from 'forta-agent';
 
-import GoerliConfig from 'compound-config/networks/goerli.json';
-import GoerliAbiConfig from 'compound-config/networks/goerli-abi.json';
-import MainnetConfig from 'compound-config/networks/mainnet.json';
-import MainnetAbiConfig from 'compound-config/networks/mainnet-abi.json';
-import RinkebyConfig from 'compound-config/networks/rinkeby.json';
-import RinkebyAbiConfig from 'compound-config/networks/rinkeby-abi.json';
-import RopstenConfig from 'compound-config/networks/ropsten.json';
-import RopstenAbiConfig from 'compound-config/networks/ropsten-abi.json';
+import GoerliConfig from './config/goerli.json';
+import GoerliAbiConfig from './config/goerli-abi.json';
+import MainnetConfig from './config/mainnet.json';
+import MainnetAbiConfig from './config/mainnet-abi.json';
+import RinkebyConfig from './config/rinkeby.json';
+import RinkebyAbiConfig from './config/rinkeby-abi.json';
+import RopstenConfig from './config/ropsten.json';
+import RopstenAbiConfig from './config/ropsten-abi.json';
 
 export const CompoundNetworkConfig = {
   [Network.GOERLI]: GoerliConfig,

@@ -1,6 +1,6 @@
 {
   "name": "compound-utilization-rate-agent",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Compound Utilization Rate Agent",
   "scripts": {
     "build": "tsc",
@@ -16,8 +16,7 @@
     "disable": "forta-agent disable",
     "enable": "forta-agent enable",
     "keyfile": "forta-agent keyfile",
-    "test": "jest",
-    "install": "napa compound-finance/compound-config"
+    "test": "jest"
   },
   "dependencies": {
     "bignumber.js": "^9.0.1",
@@ -34,13 +33,6 @@
     "nodemon": "^2.0.8",
     "prettier": "^2.4.1",
     "ts-jest": "^27.0.3",
-    "typescript": "^4.3.4",
-    "napa": "^3.0.0"
-  },
-  "optionalDependencies": {
-    "fsevents": "^2.3.2"
-  },
-  "config": {
-    "unsafe-perm": true
+    "typescript": "^4.3.4"
   }
 }
