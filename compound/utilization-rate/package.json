@@ -1,6 +1,6 @@
 {
   "name": "compound-utilization-rate-agent",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Compound agent that alerts if utilization rate of provided token pools changed by a certain percentage within a certain period",
   "chainIds": [
     1
@@ -15,6 +15,7 @@
     "range": "npm run build && forta-agent run --range",
     "file": "npm run build && forta-agent run --file",
     "publish": "forta-agent publish",
+	"push": "forta-agent push",
     "disable": "forta-agent disable",
     "enable": "forta-agent enable",
     "test": "jest"
