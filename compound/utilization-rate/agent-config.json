@@ -1,5 +1,5 @@
 {
-  "alertChangeRate": 0.000000001,
+  "alertChangeRate": 0.1,
   "watchInterval": 3600,
   "watchTokens": [
     "cFEI",
