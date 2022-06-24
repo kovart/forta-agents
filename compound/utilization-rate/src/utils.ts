@@ -4,6 +4,8 @@ import { AbiItem } from 'web3-utils';
 
 import { CompoundNetworkABI, CompoundNetworkConfig } from './constants';
 
+type SupportedNetwork = keyof typeof CompoundNetworkConfig;
+
 type CTokenContract = {
   address: string;
   name: string;
@@ -11,14 +13,19 @@ type CTokenContract = {
   abi: AbiItem[];
 };
 
-export class CompoundUtils {
-  private static readonly instanceMap: Map<Network, CompoundUtils> = new Map();
+type TokenRecord = {
+  rate: BigNumber;
+  timestamp: number;
+};
+
+export class CompoundConfig {
+  private static readonly instanceMap: Map<Network, CompoundConfig> = new Map();
 
   public cTokens: CTokenContract[];
 
-  constructor(network: Network) {
+  constructor(network: SupportedNetwork) {
     const networkConfig = CompoundNetworkConfig[network] as any;
-    const abuConfig = CompoundNetworkABI[network] as any;
+    const abiConfig = CompoundNetworkABI[network] as any;
 
     this.cTokens = Object.values(networkConfig.cTokens || {});
 
@@ -27,50 +34,64 @@ export class CompoundUtils {
     }
 
     for (const cToken of this.cTokens) {
-      cToken.abi = abuConfig[cToken.symbol];
+      cToken.abi = abiConfig[cToken.symbol];
     }
   }
 
-  static getInstance(network: Network): CompoundUtils {
+  static getInstance(network: SupportedNetwork): CompoundConfig {
     if (!this.instanceMap.has(network)) {
-      this.instanceMap.set(network, new CompoundUtils(network));
+      this.instanceMap.set(network, new CompoundConfig(network));
     }
 
     return this.instanceMap.get(network)!;
   }
-
-  static removeInstance(network: Network) {
-    this.instanceMap.delete(network);
-  }
 }
-
-type TokenRecord = {
-  rate: BigNumber;
-  timestamp: number;
-};
 
 export class TokenRateStorage {
   public expireTime: number;
-  public utilizationRateMap: { [x: string]: Array<TokenRecord> };
+  public utilizationRateMap: { [tokenSymbol: string]: Array<TokenRecord> };
+  public getTime: () => number;
 
-  constructor(expireTime: number = 60 * 60) {
+  constructor(expireTime: number = 60 * 60, getTime?: () => number) {
     this.expireTime = expireTime; // time after which the rate expired
     this.utilizationRateMap = {};
+    this.getTime = getTime || (() => Math.floor(Number(new Date()) / 1000));
   }
 
   get(tokenSymbol: string): Array<TokenRecord> {
     return this.utilizationRateMap[tokenSymbol] || [];
   }
 
-  save(tokenSymbol: string, rate: BigNumber, timestamp: number) {
-    // normalize to block timestamp
-    const now = Math.floor(Number(new Date()) / 1000);
-
+  add(tokenSymbol: string, rate: BigNumber, timestamp: number) {
     if (!this.utilizationRateMap[tokenSymbol]) {
       this.utilizationRateMap[tokenSymbol] = [];
     }
 
     this.utilizationRateMap[tokenSymbol].push({ rate, timestamp });
+  }
+
+  public getRateStats(tokenSymbol: string) {
+    this.clearExpiredRates();
+
+    const records = this.utilizationRateMap[tokenSymbol] || [];
+
+    let lowestRate = records[0]?.rate;
+    let highestRate = records[0]?.rate;
+    for (let i = 1; i < records.length; i++) {
+      const record = records[i];
+      if (record.rate.isGreaterThan(highestRate)) {
+        highestRate = record.rate;
+      }
+      if (record.rate.isLessThan(lowestRate)) {
+        lowestRate = record.rate;
+      }
+    }
+
+    return { lowestRate: lowestRate || new BigNumber(0), highestRate: highestRate || new BigNumber(0) };
+  }
+
+  private clearExpiredRates() {
+    const now = this.getTime();
 
     // clear expired rates
     for (const [tokenSymbol, records] of Object.entries(this.utilizationRateMap)) {
@@ -78,24 +99,6 @@ export class TokenRateStorage {
         (record) => record.timestamp + this.expireTime >= now
       );
     }
-  }
-
-  public getRateStats(tokenSymbol: string) {
-    let lowestRate = new BigNumber(0);
-    let highestRate = new BigNumber(0);
-
-    const records = this.utilizationRateMap[tokenSymbol] || [];
-
-    for (const record of records) {
-      if (record.rate.isGreaterThan(highestRate)) {
-        highestRate = record.rate;
-      }
-      if (lowestRate.isZero() || record.rate.isLessThan(lowestRate)) {
-        lowestRate = record.rate;
-      }
-    }
-
-    return { lowestRate, highestRate };
   }
 }
 

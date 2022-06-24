@@ -1,7 +1,10 @@
 {
   "name": "compound-utilization-rate-agent",
   "version": "0.0.2",
-  "description": "Compound Utilization Rate Agent",
+  "description": "Compound agent that alerts if utilization rate of provided token pools changed by a certain percentage within a certain period",
+  "chainIds": [
+    1
+  ],
   "scripts": {
     "build": "tsc",
     "start": "npm run start:dev",
@@ -12,27 +15,26 @@
     "range": "npm run build && forta-agent run --range",
     "file": "npm run build && forta-agent run --file",
     "publish": "forta-agent publish",
-    "push": "forta-agent push",
     "disable": "forta-agent disable",
     "enable": "forta-agent enable",
-    "keyfile": "forta-agent keyfile",
     "test": "jest"
   },
   "dependencies": {
-    "bignumber.js": "^9.0.1",
-    "forta-agent": "^0.0.34",
-    "keccak256": "^1.0.3",
+    "bignumber.js": "^9.0.2",
+    "forta-agent": "^0.1.7",
+    "keccak256": "^1.0.6",
     "lodash": "^4.17.21",
-    "web3": "^1.6.0"
+    "web3": "^1.7.3"
   },
   "devDependencies": {
-    "@types/jest": "^27.0.1",
+    "@types/jest": "^28.1.1",
     "@types/lodash": "^4.14.176",
-    "@types/nodemon": "^1.19.0",
-    "jest": "^27.0.6",
-    "nodemon": "^2.0.8",
-    "prettier": "^2.4.1",
-    "ts-jest": "^27.0.3",
-    "typescript": "^4.3.4"
+    "@types/nodemon": "^1.19.1",
+    "forta-agent-tools": "^2.0.7",
+    "jest": "^28.1.1",
+    "nodemon": "^2.0.16",
+    "prettier": "^2.6.2",
+    "ts-jest": "^28.0.4",
+    "typescript": "^4.7.3"
   }
 }

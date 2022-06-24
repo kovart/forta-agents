@@ -1,0 +1,26 @@
+{
+  "alertChangeRate": 0.000000001,
+  "watchInterval": 3600,
+  "watchTokens": [
+    "cFEI",
+    "cUSDP",
+    "cAAVE",
+    "cSUSHI",
+    "cYFI",
+    "cTUSD",
+    "cLINK",
+    "cWBTC2",
+    "cCOMP",
+    "cUSDC",
+    "cDAI",
+    "cUSDT",
+    "cBAT",
+    "cETH",
+    "cSAI",
+    "cREP",
+    "cZRX",
+    "cWBTC",
+    "cUNI",
+    "cMKR"
+  ]
+}
