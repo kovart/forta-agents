@@ -36,8 +36,6 @@ function provideHandleBlock(
       // Find the lowest and highest rates before we process this block
       const { lowestRate, highestRate } = tokenStorage.getRateStats(cToken.symbol);
 
-      console.log('Token '+cToken.symbol, lowestRate.toString(), highestRate.toString())
-
       // Calculate current utilization rate
       const currentRate = new BigNumber(borrows).div(new BigNumber(cash).plus(borrows).minus(reserves));
 
