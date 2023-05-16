@@ -7,7 +7,7 @@ export const ROLE_GRANTED_ALERT_ID = 'OPENZEPPELIN-TIMELOCK-CONTROLLER-2';
 export const ROLE_REVOKED_ALERT_ID = 'OPENZEPPELIN-TIMELOCK-CONTROLLER-3';
 export const ROLE_RENOUNCED_ALERT_ID = 'OPENZEPPELIN-TIMELOCK-CONTROLLER-4';
 export const NO_SELF_ADMINISTRATION_ALERT_ID = 'OPENZEPPELIN-TIMELOCK-CONTROLLER-5';
-export const ARCHIVE_DATA_MODE = false; // https://infura.io/docs/ethereum/add-ons/archiveData
+export const ARCHIVE_DATA_MODE = true;
 
 export const TimelockControllerRoles = {
   // BASIC
@@ -25,7 +25,10 @@ export const TimelockControllerRoles = {
   UNPAUSER: 'UNPAUSER',
   RELAY: 'RELAY',
   ACTION: 'ACTION',
-  SNAPSHOT: 'SNAPSHOT'
+  SNAPSHOT: 'SNAPSHOT',
+  CANCELLER: 'CANCELLER_ROLE',
+  DISTRIBUTOR: 'DISTRIBUTOR_ROLE',
+  GUARDIAN: 'GUARDIAN_ROLE',
 };
 
 export const TimelockControllerEvents = {

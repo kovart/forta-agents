@@ -26,17 +26,13 @@ This agent fires alert if one of the following roles is detected in `RoleGranted
 - RELAY_ROLE
 - ACTION_ROLE
 - SNAPSHOT_ROLE
+- CANCELLER_ROLE
+- DISTRIBUTOR_ROLE
+- GUARDIAN_ROLE
 
 ## Variables
 
 Variables can be configured in the `constants.ts` file.
-
-##### ARCHIVE_DATA_MODE: `boolean`
-
-- Allows to get the state at the block an event was emitted
-- Enable only if JSON-RPC Provider supports this mode
-- Read more: https://infura.io/docs/ethereum/add-ons/archiveData
-- Default `true`
 
 ## Supported Chains
 

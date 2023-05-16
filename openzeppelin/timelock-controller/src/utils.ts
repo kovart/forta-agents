@@ -54,7 +54,10 @@ export class TimelockUtils {
     [utils.id('UNPAUSER_ROLE')]: TimelockControllerRoles.UNPAUSER,
     [utils.id('RELAY_ROLE')]: TimelockControllerRoles.RELAY,
     [utils.id('ACTION_ROLE')]: TimelockControllerRoles.ACTION,
-    [utils.id('SNAPSHOT_ROLE')]: TimelockControllerRoles.SNAPSHOT
+    [utils.id('SNAPSHOT_ROLE')]: TimelockControllerRoles.SNAPSHOT,
+    [utils.id('CANCELLER_ROLE')]: TimelockControllerRoles.CANCELLER,
+    [utils.id('DISTRIBUTOR_ROLE')]: TimelockControllerRoles.DISTRIBUTOR,
+    [utils.id('GUARDIAN_ROLE')]: TimelockControllerRoles.GUARDIAN,
   };
 
   constructor(
