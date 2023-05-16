@@ -1,6 +1,6 @@
 {
-  "name": "openzeppelin-timelock-controller-bot",
-  "version": "0.1.0",
+  "name": "timelock-controller-monitor",
+  "version": "0.1.1",
   "description": "Helps to monitor role changes in contracts implementing TimelockController",
   "repository": "https://github.com/kovart/forta-agents/tree/main/openzeppelin/timelock-controller/",
   "chainIds": [
