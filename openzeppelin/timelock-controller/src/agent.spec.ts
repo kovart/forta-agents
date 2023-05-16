@@ -1,5 +1,5 @@
 import { HandleTransaction } from 'forta-agent';
-import { TestTransactionEvent } from 'forta-agent-tools';
+import { TestTransactionEvent } from 'forta-agent-tools/lib/test';
 import agent from './agent';
 
 const { provideHandleTransaction } = agent;

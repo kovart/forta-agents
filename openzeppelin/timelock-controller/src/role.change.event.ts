@@ -26,7 +26,7 @@ function provideHandleTransaction(timelockUtils: TimelockUtils, logUtils: LogUti
   return async function handleTransaction(txEvent: TransactionEvent) {
     const findings: Finding[] = [];
 
-    const logs = logUtils.parse(txEvent.receipt.logs, TimelockControllerAbi);
+    const logs = logUtils.parse(txEvent.logs, TimelockControllerAbi);
 
     const roleGrantedLogs = logs.filter((log) => log.signature === RoleGranted.signature);
     const roleRevokedLogs = logs.filter((log) => log.signature === RoleRevoked.signature);

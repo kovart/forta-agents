@@ -1,5 +1,6 @@
+import {createAddress} from "forta-agent-tools";
 import { HandleTransaction } from 'forta-agent';
-import { TestTransactionEvent, createAddress } from 'forta-agent-tools';
+import { TestTransactionEvent } from 'forta-agent-tools/lib/test';
 import { utils } from 'ethers';
 import { TestUtils } from './utils';
 import Agent from './execute.reentrancy';

@@ -1,7 +1,8 @@
 import { FindingSeverity, FindingType, HandleTransaction } from 'forta-agent';
-import { createAddress, TestTransactionEvent } from 'forta-agent-tools';
-import { TestUtils } from './utils';
+import { createAddress } from 'forta-agent-tools';
+import { TestTransactionEvent } from 'forta-agent-tools/lib/test';
 import { utils } from 'ethers';
+import { TestUtils } from './utils';
 import { TimelockControllerRoles } from './constants';
 import Agent from './role.change.event';
 

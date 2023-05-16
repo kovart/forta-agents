@@ -16,7 +16,7 @@ function provideHandleTransaction(logUtils: LogUtils) {
   return async function handleTransaction(txEvent: TransactionEvent) {
     const findings: Finding[] = [];
 
-    const logs = logUtils.parse(txEvent.receipt.logs, TimelockControllerAbi);
+    const logs = logUtils.parse(txEvent.logs, TimelockControllerAbi);
     const minDelayChangeLogs = logs.filter((log) => log.signature === MinDelayChange.signature);
     const involvedContractAddresses = uniq(minDelayChangeLogs.map((log) => log.address));
 
